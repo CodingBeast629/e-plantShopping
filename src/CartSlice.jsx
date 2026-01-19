@@ -1,54 +1,50 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 export const CartSlice = createSlice({
-  name: 'cart',
+  name: "cart",
   initialState: {
-    items: [], // Initialize items as an empty array
+    items: [], // { name, image, description, cost, quantity }
   },
   reducers: {
-    // payload: plant object { name, image, description, cost }
+    // Called from ProductList.jsx
     addItem: (state, action) => {
       const plant = action.payload;
 
-      // Find if item already exists
-      const existingItem = state.items.find((item) => item.name === plant.name);
+      const existingItem = state.items.find(
+        (item) => item.name === plant.name
+      );
 
       if (existingItem) {
         existingItem.quantity += 1;
       } else {
-        state.items.push({
-          ...plant,
-          quantity: 1,
-        });
+        state.items.push({ ...plant, quantity: 1 });
       }
     },
 
-    // payload: item name (string) OR { name }
+    // Remove item entirely by name
     removeItem: (state, action) => {
-      const payload = action.payload;
-      const name = typeof payload === 'string' ? payload : payload?.name;
-
+      const name = action.payload;
       state.items = state.items.filter((item) => item.name !== name);
     },
 
-    // payload: { name, amount }
+    // Update quantity via + / -
     updateQuantity: (state, action) => {
       const { name, amount } = action.payload;
 
-      const item = state.items.find((i) => i.name === name);
+      const item = state.items.find((item) => item.name === name);
       if (!item) return;
 
-      // If your UI allows 0, you can remove; otherwise clamp to at least 1
-      if (amount <= 0) {
-        state.items = state.items.filter((i) => i.name !== name);
-      } else {
-        item.quantity = amount;
+      item.quantity = amount;
+
+      // Auto-remove if quantity hits 0
+      if (item.quantity <= 0) {
+        state.items = state.items.filter((item) => item.name !== name);
       }
     },
   },
 });
 
 export const { addItem, removeItem, updateQuantity } = CartSlice.actions;
-
 export default CartSlice.reducer;
+
 
